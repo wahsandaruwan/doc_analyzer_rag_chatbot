@@ -4,7 +4,7 @@ from langchain.schema.runnable import RunnablePassthrough
 from langchain.schema.output_parser import StrOutputParser
 from langchain.prompts import PromptTemplate
 from langchain_ollama import ChatOllama
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_community.embeddings import FastEmbedEmbeddings
 import streamlit as st
 
@@ -13,20 +13,29 @@ CHROMA_PERSIST_DIRECTORY = "chroma_db"  # Consistent definition
 class Rag:
     def __init__(self) -> None:
         self.csv_obj = cvs()
+        # self.prompt = PromptTemplate.from_template(
+        #     """
+        #     <s> [INST] You are a helpful assistant designed for question-answering tasks. Use the provided context to answer the user's question.
+
+        #     **Instructions:**
+
+        #     If the context contains sufficient information to confidently answer the question, provide a concise answer (maximum 10 sentences). If the context does *not* contain sufficient information (less than 50% of relevant information is present), respond with: "Insufficient information to provide a complete answer. But here's what I found from the knowledge base:" provide the retrieved information (maximum 10 sentences).
+        #     [/INST] </s>
+        #     [INST] Question: {question}
+        #     Context: {context}
+        #     Answer: [/INST]
+        #     """
+        # )
         self.prompt = PromptTemplate.from_template(
             """
-            <s> [INST] You are a helpful assistant designed for question-answering tasks. Use the provided context to answer the user's question.
+            Use the following context to answer the question. If the context doesn't contain the answer, say "I don't know".
 
-            **Instructions:**
-
-            If the context contains sufficient information to confidently answer the question, provide a concise answer (maximum 10 sentences). If the context does *not* contain sufficient information (less than 50% of relevant information is present), respond with: "Insufficient information to provide a complete answer. But here's what I found from the knowledge base:" provide the retrieved information (maximum 10 sentences).
-            [/INST] </s>
-            [INST] Question: {question}
             Context: {context}
-            Answer: [/INST]
+            Question: {question}
+            Answer:
             """
         )
-        self.model = ChatOllama(model="granite3-moe:1b")
+        self.model = ChatOllama(model="Llama3.1")
         self.vector_store = None
         self.retriever = None
         self.chain = None
